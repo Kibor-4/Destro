@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../Public/stylesheet/valuate.css"> 
+    <title>VALUATE</title>
+</head>
+<body>
+    <div class="container">
+        <h2>House Valuation Form</h2>
+        <form id="valuationForm">
+            <!-- Location -->
+            <label for="location">Location:</label>
+            <input type="text" id="location" name="location" placeholder="Enter your city or neighborhood" required>
+
+            <!-- House Type -->
+            <label for="house_type">House Type:</label>
+            <select id="house_type" name="house_type" required onchange="toggleLotSize()">
+                <option value="apartment">Apartment</option>
+                <option value="townhouse">Townhouse</option>
+                <option value="bungalow">Bungalow</option>
+                <option value="villa">Villa</option>
+                <option value="condo">Condo</option>
+                <option value="duplex">Duplex</option>
+                <option value="mansion">Mansion</option>
+                <option value="other">Other</option>
+            </select>
+
+            <!-- Square Footage -->
+            <label for="sqft">Square Footage (Size):</label>
+            <input type="number" id="sqft" name="sqft" placeholder="Enter the size in sqft" required>
+
+            <!-- Number of Bedrooms -->
+            <label for="bedrooms">Number of Bedrooms:</label>
+            <input type="number" id="bedrooms" name="bedrooms" placeholder="Enter the number of bedrooms" required>
+
+            <!-- Number of Bathrooms -->
+            <label for="bathrooms">Number of Bathrooms:</label>
+            <input type="number" id="bathrooms" name="bathrooms" placeholder="Enter the number of bathrooms" required>
+
+            <!-- Age and Condition -->
+            <label for="age">Age of the Property (Years):</label>
+            <input type="number" id="age" name="age" placeholder="Enter the age of the property" required>
+
+            <label for="condition">Condition of the Property:</label>
+            <select id="condition" name="condition" required>
+                <option value="excellent">Excellent</option>
+                <option value="good">Good</option>
+                <option value="fair">Fair</option>
+                <option value="poor">Poor</option>
+            </select>
+
+            <!-- Layout and Design -->
+            <label for="layout">Layout and Design:</label>
+            <textarea id="layout" name="layout" placeholder="Describe the layout and design (e.g., open floor plan, modern design)"></textarea>
+
+            <!-- Amenities -->
+            <label for="amenities">Amenities:</label>
+            <textarea id="amenities" name="amenities" placeholder="List amenities (e.g., pool, garage, fireplace, solar panels)"></textarea>
+
+            <!-- Lot Size -->
+            <label for="lot_size">Lot Size (in sqft):</label>
+            <input type="number" id="lot_size" name="lot_size" placeholder="Enter the size of the lot">
+
+            <!-- Submit Button -->
+            <input type="submit" value="Evaluate">
+        </form>
+
+        <!-- Display Predicted Price -->
+        <div id="predictionResult" class="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('valuationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Collect form data
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            // Send data to the backend
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                const result = await response.json();
+                document.getElementById('predictionResult').innerText = `Predicted Price: $${result.predictedPrice}`;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('predictionResult').innerText = 'Error predicting price. Please try again.';
+            }
+        });
+    </script>
+</body>
+</html>

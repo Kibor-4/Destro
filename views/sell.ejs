@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Houses for Sale</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .property-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .property-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: calc(33.333% - 20px);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .property-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .property-details {
+            padding: 15px;
+        }
+        .property-details h3 {
+            margin: 0 0 10px;
+            font-size: 1.5em;
+            color: #333;
+        }
+        .property-details p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .property-details .price {
+            font-size: 1.2em;
+            color: #28a745;
+            font-weight: bold;
+        }
+        .property-details .location {
+            font-weight: bold;
+        }
+        .property-details .type {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Houses for Sale</h1>
+        <div class="property-list">
+            <!-- Property 1 -->
+            <div class="property-card">
+                <img src="https://via.placeholder.com/400x200" alt="House 1">
+                <div class="property-details">
+                    <h3>Beautiful Family Home</h3>
+                    <p class="location">📍 New York, NY</p>
+                    <p class="type">🏠 Single-Family House</p>
+                    <p>📐 2,500 sqft</p>
+                    <p>🛏️ 4 Bedrooms</p>
+                    <p>🛁 3 Bathrooms</p>
+                    <p class="price">$750,000</p>
+                </div>
+            </div>
+
+            <!-- Property 2 -->
+            <div class="property-card">
+                <img src="https://via.placeholder.com/400x200" alt="House 2">
+                <div class="property-details">
+                    <h3>Modern Apartment</h3>
+                    <p class="location">📍 San Francisco, CA</p>
+                    <p class="type">🏢 Apartment</p>
+                    <p>📐 1,200 sqft</p>
+                    <p>🛏️ 2 Bedrooms</p>
+                    <p>🛁 2 Bathrooms</p>
+                    <p class="price">$1,200,000</p>
+                </div>
+            </div>
+
+            <!-- Property 3 -->
+            <div class="property-card">
+                <img src="https://via.placeholder.com/400x200" alt="House 3">
+                <div class="property-details">
+                    <h3>Cozy Townhouse</h3>
+                    <p class="location">📍 Chicago, IL</p>
+                    <p class="type">🏡 Townhouse</p>
+                    <p>📐 1,800 sqft</p>
+                    <p>🛏️ 3 Bedrooms</p>
+                    <p>🛁 2.5 Bathrooms</p>
+                    <p class="price">$500,000</p>
+                </div>
+            </div>
+
+            <!-- Property 4 -->
+            <div class="property-card">
+                <img src="https://via.placeholder.com/400x200" alt="House 4">
+                <div class="property-details">
+                    <h3>Luxury Villa</h3>
+                    <p class="location">📍 Miami, FL</p>
+                    <p class="type">🏰 Villa</p>
+                    <p>📐 4,000 sqft</p>
+                    <p>🛏️ 5 Bedrooms</p>
+                    <p>🛁 4 Bathrooms</p>
+                    <p class="price">$2,500,000</p>
+                </div>
+            </div>
+
+            <!-- Property 5 -->
+            <div class="property-card">
+                <img src="https://via.placeholder.com/400x200" alt="House 5">
+                <div class="property-details">
+                    <h3>Charming Bungalow</h3>
+                    <p class="location">📍 Austin, TX</p>
+                    <p class="type">🏚️ Bungalow</p>
+                    <p>📐 1,500 sqft</p>
+                    <p>🛏️ 2 Bedrooms</p>
+                    <p>🛁 1 Bathroom</p>
+                    <p class="price">$350,000</p>
+                </div>
+            </div>
+
+            <!-- Property 6 -->
+            <div class="property-card">
+                <img src="https://via.placeholder.com/400x200" alt="House 6">
+                <div class="property-details">
+                    <h3>Spacious Condo</h3>
+                    <p class="location">📍 Seattle, WA</p>
+                    <p class="type">🏬 Condo</p>
+                    <p>📐 1,600 sqft</p>
+                    <p>🛏️ 3 Bedrooms</p>
+                    <p>🛁 2 Bathrooms</p>
+                    <p class="price">$900,000</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
