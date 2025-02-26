@@ -1,71 +1,44 @@
 const express = require('express');
+const { body, validationResult } = require('express-validator');
 const router = express.Router();
-const db = require('../database/db'); // Assuming you have a database connection module
 const bcrypt = require('bcrypt'); // Import bcrypt for password hashing
+const getPool = require('../database/db'); // Import database pool
 
-// POST /submit
-router.post('/', async (req, res) => {
-  const { username, email, dateOfBirth, password } = req.body;
-
-  // Check for missing fields
-  const missingFields = [];
-  if (!username) missingFields.push('username');
-  if (!email) missingFields.push('email');
-  if (!dateOfBirth) missingFields.push('dateOfBirth');
-  if (!password) missingFields.push('password');
-
-  // If any fields are missing, return an error with the list of missing fields
-  if (missingFields.length > 0) {
-    return res.status(400).json({ 
-      error: 'Some fields are missing', 
-      missingFields: missingFields 
-    });
-  }
-
-  // Convert "mm/dd/yyyy" to MySQL format ("YYYY-MM-DD")
-  const dobDate = new Date(dateOfBirth);
-  const today = new Date();
-  const age = today.getFullYear() - dobDate.getFullYear();
-
-  if (age < 18) {
-    return res.status(400).json({ error: 'You must be at least 18 years old.' });
-  }
-
-  try {
-    // Check if username already exists
-    db.query('SELECT * FROM Users WHERE username = ?', [username], async (error, rows) => {
-      if (error) {
-        console.error('Database error while checking username:', error);
-        return res.status(500).json({ error: 'Server error. Please try again later.' });
-      }
-
-      if (rows.length > 0) {
-        return res.status(400).json({ error: 'Username already exists' });
-      }
-
-      // Hash the password using bcrypt
-      const saltRounds = 10; // Number of salt rounds for hashing
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-      // Insert user into database with the hashed password
-      db.query(
-        'INSERT INTO Users (Username, Email, Date_of_Birth, Password) VALUES (?, ?, ?, ?)',
-        [username, email, dateOfBirth, hashedPassword],
-        (error, result) => {
-          if (error) {
-            console.error('Database error while inserting user:', error);
-            return res.status(500).json({ error: 'Server error. Please try again later.' });
-          }
-
-          console.log('User registered successfully:', { username, email, dateOfBirth });
-          res.status(201).json({ message: 'User registered successfully', data: req.body });
+// Validation middleware
+const validateUser = [
+    body('username').notEmpty().withMessage('Username is required'),
+    body('email').isEmail().withMessage('Invalid email address'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
         }
-      );
-    });
-  } catch (error) {
-    console.error('Error hashing password:', error);
-    res.status(500).json({ error: 'Server error. Please try again later.' });
-  }
+        next();
+    }
+];
+
+// Route for submitting user signup data
+router.post('/submit', validateUser, async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Save user to the database
+        const pool = await getPool;
+        await pool.query(
+            'INSERT INTO Users (Username, EMAIL, Password) VALUES (?, ?, ?)',
+            [username, email, hashedPassword]
+        );
+
+        // Redirect to login page after successful signup
+        res.redirect('/login'); // Redirect to the login route
+    } catch (error) {
+        console.error("Signup error:", error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
 module.exports = router;

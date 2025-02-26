@@ -1,96 +1,136 @@
 const express = require('express');
+const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 const path = require('path');
-const routes = require('./router/routes'); 
-const userRoutes = require('./router/signup'); 
-const upload = require('./Public/Uploads/multer'); 
-const bodyParser = require('body-parser');
-const cors = require("cors");
+const cors = require('cors');
+const getPool = require('./database/db');
+const routes = require('./router/routes');
+const userRoutes = require('./router/signup');
+const loginRouter = require('./router/auth');
+const addPropertyRouter = require('./router/addproperty');
+const saleRouter = require('./router/salerouter');
+const authadmin = require('./router/authadmin');
+const admindash = require('./router/user_dash');
+const profile = require('./router/user');
+const fs = require('fs'); 
+const propertydetails = require('./router/property');
+const userdashboard = require('./router/user_dash');
+const home = require('./router/index');
 
 const app = express();
-// Parse request bodies
-app.use(bodyParser.urlencoded({ extended: true })); 
-app.use(bodyParser.json()); 
 
-// Set EJS as the view engine
-app.set('view engine', 'ejs');
-// Set the views directory
-app.set('views', __dirname + '/views');
+// Load environment variables from .env file
+require('dotenv').config();
 
+// Logging middleware (ADDED)
+app.use((req, res, next) => {
+    const now = new Date().toISOString();
+    const logMessage = `${now} - ${req.method} ${req.url} - Session ID: ${req.sessionID || 'No Session'}\n`;
 
+    fs.appendFile('server.log', logMessage, (err) => {
+        if (err) {
+            console.error('Error writing to log file:', err);
+        }
+    });
 
+    console.log(logMessage.trim()); // Also log to console
+    next();
+});
 
-// Use the imported routes
-app.use('/', routes); 
-app.use('/submit', userRoutes); 
+// CORS configuration (if needed)
 app.use(cors());
 
-// Serve static files
-app.use('/Public/stylesheet', express.static(path.join(__dirname, 'Public', 'stylesheet')));
-app.use('/Public/images', express.static(path.join(__dirname, 'Public', 'images')));
-app.use('/Public/Uploads',express.static(path.join(__dirname,'Public','Uploads' )));
+// ... (Rest of your code remains the same) ...
 
-app.get('/add-property', (req, res) => {
-  res.render('add-property'); // Render the form (add-property.ejs)
+// MySQL session store configuration
+const sessionStore = new MySQLStore({
+    host: process.env.DB_HOST, // Use DB_HOST from .env
+    port: 3306, // Default MySQL port
+    user: process.env.DB_USER, // Use DB_USER from .env
+    password: process.env.DB_PASSWORD, // Use DB_PASSWORD from .env
+    database: process.env.DB_NAME, // Use DB_NAME from .env
+    createDatabaseTable: true, // Automatically create the sessions table
+    schema: {
+        tableName: 'user_sessions', // Name of the sessions table
+        columnNames: {
+            session_id: 'session_id',
+            expires: 'expires',
+            data: 'data'
+        }
+    }
 });
 
-// Route to handle form submission
-/*app.post('/upload', upload.array('images[]'), (req, res) => {
-  // Extract form data
-  const { location, house_type, sqft, bedrooms, bathrooms, lot_size, price, description } = req.body;
+// Session middleware
+app.use(session({
+    store: sessionStore,
+    secret: 'your_secret_key', // Replace with a strong, random secret
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        secure: false, // Set to true in production with HTTPS
+        maxAge: 1000 * 60 * 60 * 24, // 24 hours
+        sameSite: 'lax' // Ensure the cookie is sent with cross-site requests
+    }
+}));
 
-  // Extract uploaded files
-  const images = req.files.map(file => `/uploads/${file.filename}`); // Save file paths
+// Middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-  // Render the sale.ejs file with the submitted data
-  res.render('sale', {
-    location,
-    house_type,
-    sqft,
-    bedrooms,
-    bathrooms,
-    lot_size,
-    price,
-    description,
-    images,
-  });
-});*/
+// View engine setup
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
-function predictPrice(data) {
-  // Example: Simple linear regression-like calculation
-  const basePrice = 100000; // Base price
-  const pricePerSqft = 200; // Price per square foot
-  const pricePerBedroom = 10000; // Price per bedroom
-  const pricePerBathroom = 8000; // Price per bathroom
-  const conditionMultiplier = {
-      excellent: 1.2,
-      good: 1.0,
-      fair: 0.8,
-      poor: 0.6,
-  };
+// Static files
+app.use('/Public', express.static(path.join(__dirname, 'Public')));
 
-  const predictedPrice =
-      basePrice +
-      pricePerSqft * data.sqft +
-      pricePerBedroom * data.bedrooms +
-      pricePerBathroom * data.bathrooms +
-      conditionMultiplier[data.condition] * basePrice;
+// Mount routes
+app.use('/', routes);
+app.use('/', userRoutes); // Signup routes
+app.use('/login', loginRouter); // Login routes
+app.use('/', addPropertyRouter); // Add property routes
+app.use('/', saleRouter); // Sale routes
+app.use('/admin/login', authadmin);
+app.use('/', admindash); // Mount admin routes at /admin
+app.use('/', profile); // Mount user profile routes directly at root
+app.use('/',propertydetails);
+app.use('/',userdashboard);
+app.use('/',home);
 
-  return predictedPrice.toFixed(2);
+// Logout route
+app.get('/logout', (req, res) => {
+    console.log('Session before destruction:', req.session);
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Error destroying session:', err);
+            return res.status(500).send('Logout failed');
+        }
+        console.log('Session destroyed successfully');
+        res.redirect('/login');
+    });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+    console.error('Error stack:', err.stack);
+    res.status(500).send('Something went wrong!');
+});
+
+// Start server
+async function startServer() {
+    try {
+        const pool = await getPool;
+        console.log('Database connected successfully');
+
+        const port = process.env.PORT || 8100; // Use PORT from .env
+        app.listen(port, () => {
+            console.log(`Server running on port ${port}`);
+        });
+    } catch (err) {
+        console.error("Failed to connect to database:", err);
+        process.exit(1);
+    }
 }
 
-// Prediction endpoint
-app.post('/predict', (req, res) => {
-  const data = req.body;
-
-  // Perform prediction
-  const predictedPrice = predictPrice(data);
-
-  // Send response
-  res.json({ predictedPrice });
-});
-
-
-const port = 8100;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+startServer();

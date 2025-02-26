@@ -1,52 +1,102 @@
-const mysql = require('mysql2');
-const express = require('express');
+require('dotenv').config();
+const mysql = require('mysql2/promise');
 
+let pool;
 
-const conn = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'knls123'
-});
+async function createTables(pool) {
+    const conn = await pool.getConnection();
+    try {
+        await conn.execute(`
+            CREATE TABLE IF NOT EXISTS Users (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                Username VARCHAR(255) NOT NULL UNIQUE,
+                EMAIL VARCHAR(255) NOT NULL UNIQUE,
+                Date_of_Birth DATE,
+                Password VARCHAR(255) NOT NULL,
+                profile_picture VARCHAR(255),
+                name VARCHAR(255),  -- Added name column
+                phone VARCHAR(255)   -- Added phone column
+            )
+        `);
+        console.log('Users table created or verified.');
 
-conn.connect((err) => {
-    if (err) {
-        console.log(`Database connection failed: ${err.stack}`);
-        return;
-    }
-    console.log('Database connected successfully');
+        await conn.execute(`
+            CREATE TABLE IF NOT EXISTS Properties (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                location VARCHAR(255) NOT NULL,
+                house_type VARCHAR(50) NOT NULL,
+                sqft INT NOT NULL,
+                bedrooms INT NOT NULL,
+                bathrooms INT NOT NULL,
+                lot_size INT,
+                price DECIMAL(10, 2) NOT NULL,
+                description TEXT,
+                images TEXT,
+                user_id INT,
+                FOREIGN KEY (user_id) REFERENCES Users(Id)
+            )
+        `);
+        console.log('Properties table created or verified.');
+        await conn.execute(`
+            CREATE TABLE IF NOT EXISTS user_sessions (
+            session_id VARCHAR(128) NOT NULL PRIMARY KEY,
+            expires BIGINT NOT NULL,
+            data TEXT
+        )
+        `);
+        console.log('express session created successfully.');
 
-    // Create the database
-    conn.query('CREATE DATABASE IF NOT EXISTS db4', (err, result) => {
-        if (err) {
-            console.log('Error creating database: ', err);
+        // Check if the created_at column exists and add if not
+        const [columns] = await conn.execute(`SHOW COLUMNS FROM Properties LIKE 'created_at'`);
+
+        if (columns.length === 0) {
+            await conn.execute(`
+                ALTER TABLE Properties
+                ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            `);
+            console.log('Properties table created_at column added.');
         } else {
-            console.log('Database "db4" created or already exists');
+            console.log('Properties table created_at column already exists.');
         }
 
-        // Use the created database
-        conn.query('USE db4', (err) => {
-            if (err) {
-                console.log('Error using database: ', err);
-            } else {
-                console.log('Using database "db4"');
+    } finally {
+        conn.release();
+    }
+}
 
-                // Create the "Users" table
-                conn.query('CREATE TABLE IF NOT EXISTS Users (' +
-                    'Id INT AUTO_INCREMENT PRIMARY KEY,' +
-                    'Username VARCHAR(255),'+
-                    'EMAIL VARCHAR(255),' + 
-                    'Date_of_Birth DATE,' +
-                    'Password VARCHAR(255)' +
-                    ')', (err, result) => {
-                        if (err) {
-                            console.log('Error creating table: ', err);
-                        } else {
-                            console.log('Table "Users" created or already exists');
-                        }
-                    });
+async function connectToDatabase() {
+    try {
+        if (!pool) {
+            const dbName = process.env.DB_NAME;
+
+            pool = mysql.createPool({
+                host: process.env.DB_HOST,
+                user: process.env.DB_USER,
+                password: process.env.DB_PASSWORD,
+                connectionLimit: 10,
+                waitForConnections: true,
+                queueLimit: 0,
+            });
+
+            console.log('Database pool created successfully');
+
+            const conn = await pool.getConnection();
+            try {
+                await conn.execute(`CREATE DATABASE IF NOT EXISTS ${dbName}`);
+                await conn.query(`USE ${dbName}`);
+                console.log(`Database ${dbName} created or verified.`);
+            } finally {
+                conn.release();
             }
-        });
-    });
-});
+            await createTables(pool);
+        }
+        return pool;
+    } catch (err) {
+        console.error('Database connection or creation error:', err);
+        throw err;
+    }
+}
 
-module.exports = conn;
+module.exports = (async () => {
+    return await connectToDatabase();
+})();
