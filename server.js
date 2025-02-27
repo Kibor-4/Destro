@@ -16,6 +16,7 @@ const fs = require('fs');
 const propertydetails = require('./router/property');
 const userdashboard = require('./router/user_dash');
 const home = require('./router/index');
+const valuate = require('./router/valuate');
 
 const app = express();
 
@@ -97,6 +98,7 @@ app.use('/', profile); // Mount user profile routes directly at root
 app.use('/',propertydetails);
 app.use('/',userdashboard);
 app.use('/',home);
+app.use('/',valuate);
 
 // Logout route
 app.get('/logout', (req, res) => {
