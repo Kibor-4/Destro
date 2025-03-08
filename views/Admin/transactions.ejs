@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transaction Management</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <%- include('../shared/header', { user: user }) %>
+  <%- include('../shared/sidebar') %>
+
+  <div class="main-content">
+    <h1>Transaction Management</h1>
+
+    <!-- Transaction Table -->
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Property</th>
+          <th>Buyer</th>
+          <th>Amount</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% transactions.forEach(transaction => { %>
+          <tr>
+            <td><%= transaction.id %></td>
+            <td><%= transaction.property %></td>
+            <td><%= transaction.buyer %></td>
+            <td>$<%= transaction.amount %></td>
+            <td><%= transaction.date %></td>
+            <td><%= transaction.status %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <%- include('../shared/footer') %>
+</body>
+</html>

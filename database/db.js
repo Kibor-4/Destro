@@ -37,18 +37,18 @@ async function createTables(pool) {
             )
         `);
         console.log('Properties table created or verified.');
+
         await conn.execute(`
             CREATE TABLE IF NOT EXISTS user_sessions (
-            session_id VARCHAR(128) NOT NULL PRIMARY KEY,
-            expires BIGINT NOT NULL,
-            data TEXT
-        )
+                session_id VARCHAR(128) NOT NULL PRIMARY KEY,
+                expires BIGINT NOT NULL,
+                data TEXT
+            )
         `);
-        console.log('express session created successfully.');
+        console.log('Express session table created successfully.');
 
         // Check if the created_at column exists and add if not
         const [columns] = await conn.execute(`SHOW COLUMNS FROM Properties LIKE 'created_at'`);
-
         if (columns.length === 0) {
             await conn.execute(`
                 ALTER TABLE Properties
@@ -58,7 +58,6 @@ async function createTables(pool) {
         } else {
             console.log('Properties table created_at column already exists.');
         }
-
     } finally {
         conn.release();
     }
@@ -67,33 +66,33 @@ async function createTables(pool) {
 async function connectToDatabase() {
     try {
         if (!pool) {
-            const dbName = process.env.DB_NAME;
-
             pool = mysql.createPool({
                 host: process.env.DB_HOST,
                 user: process.env.DB_USER,
                 password: process.env.DB_PASSWORD,
+                database: process.env.DB_NAME,
                 connectionLimit: 10,
                 waitForConnections: true,
                 queueLimit: 0,
+                connectTimeout: 20000, // Increase timeout
             });
 
             console.log('Database pool created successfully');
 
             const conn = await pool.getConnection();
             try {
-                await conn.execute(`CREATE DATABASE IF NOT EXISTS ${dbName}`);
-                await conn.query(`USE ${dbName}`);
-                console.log(`Database ${dbName} created or verified.`);
+                await conn.execute(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME}`);
+                console.log(`Database ${process.env.DB_NAME} created or verified.`);
             } finally {
                 conn.release();
             }
+
             await createTables(pool);
         }
         return pool;
     } catch (err) {
         console.error('Database connection or creation error:', err);
-        throw err;
+        throw new Error(`Failed to connect to database: ${err.message}`);
     }
 }
 

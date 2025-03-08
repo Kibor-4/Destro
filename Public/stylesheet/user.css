@@ -21,7 +21,9 @@ header {
 }
 
 .logo {
-    border-radius: 50%;
+    height:100px;
+    width:100px;
+    border-radius: 15%;
 }
 
 .navbar-list {

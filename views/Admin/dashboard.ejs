@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <%- include('../shared/header', { user: user }) %>
+  <%- include('../shared/sidebar') %>
+
+  <div class="main-content">
+    <h1>Welcome, <%= user.name %></h1>
+    <p>This is the admin dashboard.</p>
+
+    <!-- Quick Stats -->
+    <div class="cards">
+      <div class="card">
+        <h3>Total Properties</h3>
+        <p><%= stats.totalProperties || 0 %></p>
+      </div>
+      <div class="card">
+        <h3>Total Users</h3>
+        <p><%= stats.totalUsers || 0 %></p>
+      </div>
+      <div class="card">
+        <h3>Total Transactions</h3>
+        <p>$<%= stats.totalTransactions || 0 %></p>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../shared/footer') %>
+</body>
+</html>

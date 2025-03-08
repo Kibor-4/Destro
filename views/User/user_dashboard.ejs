@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <%- include('../shared/header', { user: user }) %>
+  <%- include('../shared/sidebar') %>
+
+  <div class="main-content">
+    <h1>Welcome, <%= user.name %></h1>
+
+    <!-- Properties for Sale -->
+    <section>
+      <h2>Properties for Sale</h2>
+      <% if (propertiesForSale.length > 0) { %>
+        <div class="property-grid">
+          <% propertiesForSale.forEach(property => { %>
+            <div class="property-card">
+              <h3><%= property.title %></h3>
+              <p><strong>Price:</strong> $<%= property.price %></p>
+              <p><strong>Location:</strong> <%= property.location %></p>
+              <p><strong>Status:</strong> <%= property.status %></p>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p>No properties for sale.</p>
+      <% } %>
+    </section>
+
+    <!-- Properties for Rent -->
+    <section>
+      <h2>Properties for Rent</h2>
+      <% if (propertiesForRent.length > 0) { %>
+        <div class="property-grid">
+          <% propertiesForRent.forEach(property => { %>
+            <div class="property-card">
+              <h3><%= property.title %></h3>
+              <p><strong>Price:</strong> $<%= property.price %></p>
+              <p><strong>Location:</strong> <%= property.location %></p>
+              <p><strong>Status:</strong> <%= property.status %></p>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p>No properties for rent.</p>
+      <% } %>
+    </section>
+
+    <!-- Last Viewed Properties -->
+    <section>
+      <h2>Last Viewed Properties</h2>
+      <% if (lastViewedProperties.length > 0) { %>
+        <div class="property-grid">
+          <% lastViewedProperties.forEach(property => { %>
+            <div class="property-card">
+              <h3><%= property.title %></h3>
+              <p><strong>Price:</strong> $<%= property.price %></p>
+              <p><strong>Location:</strong> <%= property.location %></p>
+              <p><strong>Status:</strong> <%= property.status %></p>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p>No recently viewed properties.</p>
+      <% } %>
+    </section>
+  </div>
+
+  <%- include('../shared/footer') %>
+</body>
+</html>
