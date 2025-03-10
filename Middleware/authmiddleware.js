@@ -1,4 +1,4 @@
-const getPool = require('../database/db'); // Import getPool
+const getPool = require('../database/db');
 
 const isAuthenticated = (req, res, next) => {
     console.log('Session in isAuthenticated:', req.session);

@@ -1,3 +1,4 @@
+// database/db.js
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
@@ -14,8 +15,8 @@ async function createTables(pool) {
                 Date_of_Birth DATE,
                 Password VARCHAR(255) NOT NULL,
                 profile_picture VARCHAR(255),
-                name VARCHAR(255),  -- Added name column
-                phone VARCHAR(255)   -- Added phone column
+                name VARCHAR(255),
+                phone VARCHAR(255)
             )
         `);
         console.log('Users table created or verified.');
@@ -47,7 +48,6 @@ async function createTables(pool) {
         `);
         console.log('Express session table created successfully.');
 
-        // Check if the created_at column exists and add if not
         const [columns] = await conn.execute(`SHOW COLUMNS FROM Properties LIKE 'created_at'`);
         if (columns.length === 0) {
             await conn.execute(`
@@ -74,7 +74,7 @@ async function connectToDatabase() {
                 connectionLimit: 10,
                 waitForConnections: true,
                 queueLimit: 0,
-                connectTimeout: 20000, // Increase timeout
+                connectTimeout: 20000,
             });
 
             console.log('Database pool created successfully');
@@ -96,6 +96,4 @@ async function connectToDatabase() {
     }
 }
 
-module.exports = (async () => {
-    return await connectToDatabase();
-})();
+module.exports = connectToDatabase(); // Export the promise of the pool

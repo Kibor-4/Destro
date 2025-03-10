@@ -4,26 +4,28 @@ const MySQLStore = require('express-mysql-session')(session);
 const path = require('path');
 const cors = require('cors');
 const getPool = require('./database/db');
-const routes = require('./router/routes');
-const userRoutes = require('./router/signup');
-const loginRouter = require('./router/auth');
-const addPropertyRouter = require('./router/addproperty');
-const saleRouter = require('./router/salerouter');
-const authadmin = require('./router/authadmin');
-const admindash = require('./router/dash');
-const profile = require('./router/user');
-const fs = require('fs'); 
-const propertydetails = require('./router/property');
-const userdashboard = require('./router/user_dash');
-const home = require('./router/index');
-const valuate = require('./router/valuate');
+const userRoutes = require('./router/UserRoutes/signup');
+const loginRouter = require('./router/AuthRoutes/auth');
+const addPropertyRouter = require('./router/UserRoutes/addproperty');
+const saleRouter = require('./router/UserRoutes/salerouter');
+const profile = require('./router/UserRoutes/user');
+const propertydetails = require('./router/UserRoutes/property');
+const userdashboard = require('./router/UserRoutes/dash');
+const home = require('./router/UserRoutes/index');
+const valuate = require('./router/UserRoutes/valuate');
+const auth = require('./router/AuthRoutes/auth');
+//const adminRoutes = require('./router/AdminRoutes/dashboard'); // Import admin routes
+const propertyRoutes = require('./router/AdminRoutes/properties'); // Import property routes
+//const analyticsRoutes = require('./router/AdminRoutes/analytics'); // Import analytics routes
+//const settingsRoutes = require('./router/AdminRoutes/settings'); // Import settings routes
+//const transactionRoutes = require('./router/AdminRoutes/transaction'); // Import transaction routes
+
+const fs = require('fs');
 
 const app = express();
 
-// Load environment variables from .env file
 require('dotenv').config();
 
-// Logging middleware (ADDED)
 app.use((req, res, next) => {
     const now = new Date().toISOString();
     const logMessage = `${now} - ${req.method} ${req.url} - Session ID: ${req.sessionID || 'No Session'}\n`;
@@ -34,25 +36,21 @@ app.use((req, res, next) => {
         }
     });
 
-    console.log(logMessage.trim()); // Also log to console
+    console.log(logMessage.trim());
     next();
 });
 
-// CORS configuration (if needed)
 app.use(cors());
 
-// ... (Rest of your code remains the same) ...
-
-// MySQL session store configuration
 const sessionStore = new MySQLStore({
-    host: process.env.DB_HOST, // Use DB_HOST from .env
-    port: 3306, // Default MySQL port
-    user: process.env.DB_USER, // Use DB_USER from .env
-    password: process.env.DB_PASSWORD, // Use DB_PASSWORD from .env
-    database: process.env.DB_NAME, // Use DB_NAME from .env
-    createDatabaseTable: true, // Automatically create the sessions table
+    host: process.env.DB_HOST,
+    port: 3306,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    createDatabaseTable: true,
     schema: {
-        tableName: 'user_sessions', // Name of the sessions table
+        tableName: 'user_sessions',
         columnNames: {
             session_id: 'session_id',
             expires: 'expires',
@@ -61,46 +59,48 @@ const sessionStore = new MySQLStore({
     }
 });
 
-// Session middleware
 app.use(session({
     store: sessionStore,
-    secret: 'your_secret_key', // Replace with a strong, random secret
+    secret: 'your_secret_key',
     resave: false,
     saveUninitialized: false,
     cookie: {
         httpOnly: true,
-        secure: false, // Set to true in production with HTTPS
-        maxAge: 1000 * 60 * 60 * 24, // 24 hours
-        sameSite: 'lax' // Ensure the cookie is sent with cross-site requests
+        secure: false,
+        maxAge: 1000 * 60 * 60 * 24,
+        sameSite: 'lax'
     }
 }));
 
-// Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// View engine setup
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', [
+    path.join(__dirname, 'views/user'),
+    path.join(__dirname, 'views/admin'),
+    path.join(__dirname, 'Views/Shared'),
+    path.join(__dirname, 'views')
+]);
 
-// Static files
 app.use('/Public', express.static(path.join(__dirname, 'Public')));
 
-// Mount routes
-app.use('/', routes);
-app.use('/', userRoutes); // Signup routes
-app.use('/login', loginRouter); // Login routes
-app.use('/', addPropertyRouter); // Add property routes
-app.use('/', saleRouter); // Sale routes
-app.use('/admin/login', authadmin);
-app.use('/', admindash); // Mount admin routes at /admin
-app.use('/', profile); // Mount user profile routes directly at root
-app.use('/',propertydetails);
-app.use('/',userdashboard);
-app.use('/',home);
-app.use('/',valuate);
+app.use('/', userRoutes);
+app.use('/', loginRouter);
+app.use('/', addPropertyRouter);
+app.use('/', saleRouter);
+app.use('/', profile);
+app.use('/', propertydetails);
+app.use('/', userdashboard);
+app.use('/', home);
+app.use('/', valuate);
+app.use('/', auth);
+//app.use('/', adminRoutes); // Mount admin routes
+app.use('/', propertyRoutes); // Mount property routes
+//app.use('/', analyticsRoutes); // Mount analytics routes
+//app.use('/', settingsRoutes); // Mount settings routes
+//app.use('/', transactionRoutes); // Mount transaction routes
 
-// Logout route
 app.get('/logout', (req, res) => {
     console.log('Session before destruction:', req.session);
     req.session.destroy((err) => {
@@ -113,19 +113,17 @@ app.get('/logout', (req, res) => {
     });
 });
 
-// Error handler
 app.use((err, req, res, next) => {
     console.error('Error stack:', err.stack);
     res.status(500).send('Something went wrong!');
 });
 
-// Start server
 async function startServer() {
     try {
         const pool = await getPool;
         console.log('Database connected successfully');
 
-        const port = process.env.PORT || 8100; // Use PORT from .env
+        const port = process.env.PORT || 8100;
         app.listen(port, () => {
             console.log(`Server running on port ${port}`);
         });

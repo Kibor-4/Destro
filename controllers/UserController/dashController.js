@@ -1,14 +1,13 @@
-const express = require('express');
-const router = express.Router(); // Assuming you're using Express Router
-const getPool = require('../database/db'); // Your database connection pool
-const isAuthenticated = require('./authmiddleware'); // Your authentication middleware
-const path = require('path'); // For file uploads
-const multer = require('multer'); // For file uploads
+// controllers/userDashboardController.js
 
-// Multer configuration for profile picture uploads
+const getPool = require('../../database/db');
+const path = require('path');
+const multer = require('multer');
+
+// Multer configuration (keep this in the controller or a separate config file)
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '../public/uploads/profile-pictures')); // Adjust the path as needed
+        cb(null, path.join(__dirname, '../public/uploads/profile-pictures'));
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -18,8 +17,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Dashboard route
-router.get('/user_dashboard', isAuthenticated, async (req, res) => {
+async function getUserDashboard(req, res) {
     try {
         const pool = await getPool;
         const userId = req.user.id;
@@ -31,38 +29,35 @@ router.get('/user_dashboard', isAuthenticated, async (req, res) => {
         console.error('Error fetching dashboard data:', error);
         res.status(500).send('Server Error');
     }
-});
+}
 
-// Profile update route with file upload
-router.post('/dashboard/profile', isAuthenticated, upload.single('profilePicture'), async (req, res) => {
+async function updateUserProfile(req, res) {
     try {
         const pool = await getPool;
         const userId = req.user.id;
         const { name, email, phone } = req.body;
-        let profilePicture = req.user.profilePicture; // Keep existing if not updated
+        let profilePicture = req.user.profilePicture;
 
         if (req.file) {
-            profilePicture = `/uploads/profile-pictures/${req.file.filename}`; // Store relative path
+            profilePicture = `/uploads/profile-pictures/${req.file.filename}`;
         }
 
         await pool.query('UPDATE Users SET name = ?, email = ?, phone = ?, profilePicture = ? WHERE id = ?', [name, email, phone, profilePicture, userId]);
 
-        res.redirect('/dashboard'); // Redirect to dashboard after update
+        res.redirect('/user_dashboard');
     } catch (error) {
         console.error('Error updating profile:', error);
         res.status(500).send('Server Error');
     }
-});
+}
 
-// Listing management routes (mark as sold, remove, edit)
-router.post('/listings/:id/sold', isAuthenticated, async (req, res) => {
+async function markListingSold(req, res) {
     try {
         const pool = await getPool;
         const listingId = req.params.id;
         const userId = req.user.id;
         const { saleDate, salePrice } = req.body;
 
-        // Verify ownership
         const [listing] = await pool.query('SELECT * FROM Properties WHERE id = ? AND user_id = ?', [listingId, userId]);
         if (listing.length === 0) {
             return res.status(403).send('Unauthorized');
@@ -75,15 +70,14 @@ router.post('/listings/:id/sold', isAuthenticated, async (req, res) => {
         console.error('Error marking listing as sold:', error);
         res.status(500).send('Server Error');
     }
-});
+}
 
-router.delete('/listings/:id/remove', isAuthenticated, async (req, res) => {
+async function removeListing(req, res) {
     try {
         const pool = await getPool;
         const listingId = req.params.id;
         const userId = req.user.id;
 
-        // Verify ownership
         const [listing] = await pool.query('SELECT * FROM Properties WHERE id = ? AND user_id = ?', [listingId, userId]);
         if (listing.length === 0) {
             return res.status(403).send('Unauthorized');
@@ -91,13 +85,16 @@ router.delete('/listings/:id/remove', isAuthenticated, async (req, res) => {
 
         await pool.query('DELETE FROM Properties WHERE id = ?', [listingId]);
 
-        res.sendStatus(204); // No content (successful deletion)
+        res.sendStatus(204);
     } catch (error) {
         console.error('Error removing listing:', error);
         res.status(500).send('Server Error');
     }
-});
+}
 
-// Add edit listing route here as needed
-
-module.exports = router;
+module.exports = {
+    getUserDashboard,
+    updateUserProfile: [upload.single('profilePicture'), updateUserProfile], //using array to add middleware to controller.
+    markListingSold,
+    removeListing
+};

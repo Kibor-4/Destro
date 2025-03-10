@@ -1,23 +1,12 @@
-const express = require('express');
-const router = express.Router();
-const path = require('path');
-const getPool = require('../database/db');
-const upload = require('../Public/Uploads/multer');
-const isAuthenticated = require('./authmiddleware');
-require('dotenv').config();
+const getPool = require('../../database/db');
 
-router.get('/addproperty', isAuthenticated, (req, res) => {
-    res.render('addproperty');
-});
-
-router.post('/submit', isAuthenticated, upload.array('images'), async (req, res) => {
+const submitProperty = async (req, res) => {
     try {
-        // Ensure user is authenticated and req.user.id is available
         if (!req.user || !req.user.id) {
             return res.status(401).send('Unauthorized: User ID not found.');
         }
 
-        const userId = req.user.id; // Get user ID from req.user (populated by isAuthenticated)
+        const userId = req.user.id;
         const { location, house_type, sqft, bedrooms, bathrooms, lot_size, price, description } = req.body;
         const images = req.files.map(file => '/Public/Uploads/uploads/' + file.filename);
 
@@ -32,6 +21,6 @@ router.post('/submit', isAuthenticated, upload.array('images'), async (req, res)
         console.error('Error adding property:', error);
         res.status(500).send('Error adding property.');
     }
-});
+};
 
-module.exports = router;
+module.exports = { submitProperty };
