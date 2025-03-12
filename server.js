@@ -19,6 +19,7 @@ const propertyRoutes = require('./router/AdminRoutes/properties'); // Import pro
 const analyticsRoutes = require('./router/AdminRoutes/analytics'); // Import analytics routes
 const settingsRoutes = require('./router/AdminRoutes/settings'); // Import settings routes
 const transactionRoutes = require('./router/AdminRoutes/transaction'); // Import transaction routes
+const about = require('./router/UserRoutes/routes')
 
 const fs = require('fs');
 
@@ -100,6 +101,7 @@ app.use('/', propertyRoutes); // Mount property routes
 app.use('/', analyticsRoutes); // Mount analytics routes
 app.use('/', settingsRoutes); // Mount settings routes
 app.use('/', transactionRoutes); // Mount transaction routes
+app.use('/',about);
 
 app.get('/logout', (req, res) => {
     console.log('Session before destruction:', req.session);
