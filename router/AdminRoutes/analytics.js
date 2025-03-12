@@ -1,9 +1,9 @@
 const express = require('express');
-const router = express.Router();
 const analyticsController = require('../../controllers/AdminController/analyticsController');
-const { ensureAuthenticated, ensureAdmin } = require('../../Middleware/authmiddleware'); // Import your authentication middleware
 
-// Apply middleware to protect the route
-router.get('/analytics', ensureAuthenticated, ensureAdmin, analyticsController.getAnalytics);
+const router = express.Router();
+
+// Route to render the analytics page
+router.get('/admin/analytics', analyticsController.getAnalytics);
 
 module.exports = router;

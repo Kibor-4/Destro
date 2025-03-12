@@ -3,34 +3,54 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <title>Dashboard Overview</title>
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <%- include('../shared/header', { user: user }) %>
-  <%- include('../shared/sidebar') %>
+  <div class="dashboard">
+    <div class="sidebar">
+      <h2>Admin Dashboard</h2>
+      <ul>
+        <li><a href="/admin" class="active">Dashboard</a></li>
+        <li><a href="/admin/properties">Properties</a></li>
+        <li><a href="/admin/users">Users</a></li>
+        <li><a href="/admin/transactions">Transactions</a></li>
+        <li><a href="/admin/analytics">Analytics</a></li>
+        <li><a href="/admin/settings">Settings</a></li>
+      </ul>
+    </div>
 
-  <div class="main-content">
-    <h1>Welcome, <%= user.name %></h1>
-    <p>This is the admin dashboard.</p>
+    <div class="main-content">
+      <div class="header">
+        <h1>Dashboard Overview</h1>
+        <div class="user-info">
+          <span>Welcome, Admin</span>
+          <button onclick="logout()">Logout</button>
+        </div>
+      </div>
 
-    <!-- Quick Stats -->
-    <div class="cards">
-      <div class="card">
-        <h3>Total Properties</h3>
-        <p><%= stats.totalProperties || 0 %></p>
-      </div>
-      <div class="card">
-        <h3>Total Users</h3>
-        <p><%= stats.totalUsers || 0 %></p>
-      </div>
-      <div class="card">
-        <h3>Total Transactions</h3>
-        <p>$<%= stats.totalTransactions || 0 %></p>
+      <div class="cards">
+        <div class="card">
+          <h3>Total Properties</h3>
+          <p><%= totalProperties %></p>
+        </div>
+        <div class="card">
+          <h3>Total Users</h3>
+          <p><%= totalUsers %></p>
+        </div>
+        <div class="card">
+          <h3>Total Transactions</h3>
+          <p><%= totalTransactions %></p>
+        </div>
       </div>
     </div>
   </div>
 
-  <%- include('../shared/footer') %>
+  <script>
+    function logout() {
+      console.log("Logout clicked");
+      window.location.href = '/logout';
+    }
+  </script>
 </body>
 </html>

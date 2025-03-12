@@ -14,11 +14,11 @@ const userdashboard = require('./router/UserRoutes/dash');
 const home = require('./router/UserRoutes/index');
 const valuate = require('./router/UserRoutes/valuate');
 const auth = require('./router/AuthRoutes/auth');
-//const adminRoutes = require('./router/AdminRoutes/dashboard'); // Import admin routes
+const adminRoutes = require('./router/AdminRoutes/dashboard'); // Import admin routes
 const propertyRoutes = require('./router/AdminRoutes/properties'); // Import property routes
-//const analyticsRoutes = require('./router/AdminRoutes/analytics'); // Import analytics routes
-//const settingsRoutes = require('./router/AdminRoutes/settings'); // Import settings routes
-//const transactionRoutes = require('./router/AdminRoutes/transaction'); // Import transaction routes
+const analyticsRoutes = require('./router/AdminRoutes/analytics'); // Import analytics routes
+const settingsRoutes = require('./router/AdminRoutes/settings'); // Import settings routes
+const transactionRoutes = require('./router/AdminRoutes/transaction'); // Import transaction routes
 
 const fs = require('fs');
 
@@ -95,11 +95,11 @@ app.use('/', userdashboard);
 app.use('/', home);
 app.use('/', valuate);
 app.use('/', auth);
-//app.use('/', adminRoutes); // Mount admin routes
+app.use('/', adminRoutes); // Mount admin routes
 app.use('/', propertyRoutes); // Mount property routes
-//app.use('/', analyticsRoutes); // Mount analytics routes
-//app.use('/', settingsRoutes); // Mount settings routes
-//app.use('/', transactionRoutes); // Mount transaction routes
+app.use('/', analyticsRoutes); // Mount analytics routes
+app.use('/', settingsRoutes); // Mount settings routes
+app.use('/', transactionRoutes); // Mount transaction routes
 
 app.get('/logout', (req, res) => {
     console.log('Session before destruction:', req.session);

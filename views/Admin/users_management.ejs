@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Transactions</title>
+  <title>User Management</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -13,8 +13,8 @@
       <ul>
         <li><a href="/admin">Dashboard</a></li>
         <li><a href="/admin/properties">Properties</a></li>
-        <li><a href="/admin/users">Users</a></li>
-        <li><a href="/admin/transactions" class="active">Transactions</a></li>
+        <li><a href="/admin/users" class="active">Users</a></li>
+        <li><a href="/admin/transactions">Transactions</a></li>
         <li><a href="/admin/analytics">Analytics</a></li>
         <li><a href="/admin/settings">Settings</a></li>
       </ul>
@@ -22,7 +22,7 @@
 
     <div class="main-content">
       <div class="header">
-        <h1>Transactions</h1>
+        <h1>User Management</h1>
         <div class="user-info">
           <span>Welcome, Admin</span>
           <button onclick="logout()">Logout</button>
@@ -33,28 +33,31 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Property</th>
-            <th>Buyer</th>
-            <th>Amount</th>
-            <th>Date</th>
-            <th>Status</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <% if (transactions && transactions.length > 0) { %>
-            <% transactions.forEach(transaction => { %>
+          <% if (users && users.length > 0) { %>
+            <% users.forEach(user => { %>
               <tr>
-                <td><%= transaction.id %></td>
-                <td><%= transaction.property %></td>
-                <td><%= transaction.buyer %></td>
-                <td><%= transaction.amount %></td>
-                <td><%= transaction.date %></td>
-                <td><%= transaction.status %></td>
+                <td><%= user.id %></td>
+                <td><%= user.name %></td>
+                <td><%= user.email %></td>
+                <td><%= user.role %></td>
+                <td>
+                  <a href="/admin/users/edit/<%= user.id %>"><button>Edit</button></a>
+                  <form action="/admin/users/delete/<%= user.id %>" method="post" style="display: inline;">
+                    <button type="submit">Delete</button>
+                  </form>
+                </td>
               </tr>
             <% }); %>
           <% } else { %>
             <tr>
-              <td colspan="6">No transactions found.</td>
+              <td colspan="5">No users found.</td>
             </tr>
           <% } %>
         </tbody>

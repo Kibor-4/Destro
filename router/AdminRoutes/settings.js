@@ -1,9 +1,12 @@
 const express = require('express');
-const router = express.Router();
 const settingsController = require('../../controllers/AdminController/settingsController');
-const { ensureAuthenticated, ensureAdmin } = require('../../Middleware/authmiddleware');
 
-router.get('/admin/settings', ensureAuthenticated, ensureAdmin, settingsController.getSettings);
-router.post('/admin/create-admin', ensureAuthenticated, ensureAdmin, settingsController.createAdmin);
+const router = express.Router();
+
+// Route to render the settings page
+router.get('/settings', settingsController.getSettings);
+
+// Route to handle creating a new admin
+router.post('/admin/create-admin', settingsController.createAdmin);
 
 module.exports = router;

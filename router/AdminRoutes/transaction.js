@@ -1,8 +1,9 @@
 const express = require('express');
-const router = express.Router();
 const transactionController = require('../../controllers/AdminController/transactionsController');
-const { ensureAuthenticated, ensureAdmin } = require('../../Middleware/authmiddleware');
 
-router.get('/admin/transactions', ensureAuthenticated, ensureAdmin, transactionController.getTransactionManagement);
+const router = express.Router();
+
+// Route to render the transactions page
+router.get('/admin/transactions', transactionController.getTransactions);
 
 module.exports = router;

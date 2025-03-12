@@ -4,48 +4,72 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Property Management</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <%- include('../shared/header', { user: user }) %>
-  <%- include('../shared/sidebar') %>
+  <div class="dashboard">
+    <div class="sidebar">
+      <h2>Admin Dashboard</h2>
+      <ul>
+        <li><a href="/admin">Dashboard</a></li>
+        <li><a href="/admin/properties" class="active">Properties</a></li>
+        <li><a href="/admin/users">Users</a></li>
+        <li><a href="/admin/transactions">Transactions</a></li>
+        <li><a href="/admin/analytics">Analytics</a></li>
+        <li><a href="/admin/settings">Settings</a></li>
+      </ul>
+    </div>
 
-  <div class="main-content">
-    <h1>Property Management</h1>
+    <div class="main-content">
+      <div class="header">
+        <h1>Property Management</h1>
+        <div class="user-info">
+          <span>Welcome, Admin</span>
+          <button onclick="logout()">Logout</button>
+        </div>
+      </div>
 
-    <!-- Add Property Button -->
-    <a href="/admin/properties/add" class="btn">Add Property</a>
-
-    <!-- Property Table -->
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Title</th>
-          <th>Type</th>
-          <th>Price</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% properties.forEach(property => { %>
+      <table>
+        <thead>
           <tr>
-            <td><%= property.id %></td>
-            <td><%= property.title %></td>
-            <td><%= property.type %></td>
-            <td>$<%= property.price %></td>
-            <td><%= property.status %></td>
-            <td>
-              <a href="/admin/properties/edit/<%= property.id %>" class="btn-edit">Edit</a>
-              <a href="/admin/properties/delete/<%= property.id %>" class="btn-delete">Delete</a>
-            </td>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Actions</th>
           </tr>
-        <% }) %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% if (properties && properties.length > 0) { %>
+            <% properties.forEach(property => { %>
+              <tr>
+                <td><%= property.id %></td>
+                <td><%= property.title %></td>
+                <td><%= property.type %></td>
+                <td><%= property.price %></td>
+                <td><%= property.status %></td>
+                <td>
+                  <button>Edit</button>
+                  <button>Delete</button>
+                </td>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr>
+              <td colspan="6">No properties found.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <%- include('../shared/footer') %>
+  <script>
+    function logout() {
+      console.log("Logout clicked");
+      window.location.href = '/logout';
+    }
+  </script>
 </body>
 </html>

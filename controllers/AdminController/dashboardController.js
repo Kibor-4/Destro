@@ -1,47 +1,28 @@
-const dbPromise = require('../../database/db'); // Assuming your db.js path
+const db = require('../../database/db'); // Import the MySQL connection
 
-const adminController = {
+const dashboardController = {
+  // Render the dashboard page
   getDashboard: async (req, res) => {
     try {
-      const db = await dbPromise;
+      // Fetch total properties
+      const [properties] = await db.query('SELECT COUNT(*) AS totalProperties FROM properties');
+      const totalProperties = properties[0].totalProperties;
 
-      // Fetch dashboard stats from the database
-      const stats = await getDashboardStats(db);
+      // Fetch total users
+      const [users] = await db.query('SELECT COUNT(*) AS totalUsers FROM users');
+      const totalUsers = users[0].totalUsers;
 
-      res.render('adminDashboard', {
-        user: req.session.user, // Assuming user info is stored in session
-        stats: stats,
-      });
+      // Fetch total transactions
+      const [transactions] = await db.query('SELECT COUNT(*) AS totalTransactions FROM transactions');
+      const totalTransactions = transactions[0].totalTransactions;
+
+      // Render the dashboard view with data
+      res.render('dashboard', { totalProperties, totalUsers, totalTransactions });
     } catch (error) {
-      console.error('Admin dashboard error:', error);
-      res.status(500).send('Error fetching dashboard data.');
+      console.error(error);
+      res.status(500).send('Internal Server Error');
     }
   },
 };
 
-async function getDashboardStats(db) {
-  try {
-    // Fetch total properties
-    const [propertiesResults] = await db.query('SELECT COUNT(*) as total FROM Properties');
-    const totalProperties = propertiesResults[0].total;
-
-    // Fetch total users
-    const [usersResults] = await db.query('SELECT COUNT(*) as total FROM Users');
-    const totalUsers = usersResults[0].total;
-
-    // Fetch total transactions (sum of prices from properties)
-    const [transactionsResults] = await db.query('SELECT SUM(price) as total FROM Properties');
-    const totalTransactions = transactionsResults[0].total || 0; // Handle null case
-
-    return {
-      totalProperties: totalProperties,
-      totalUsers: totalUsers,
-      totalTransactions: totalTransactions,
-    };
-  } catch (error) {
-    console.error('Error fetching dashboard stats:', error);
-    throw error; // Re-throw to be caught by the main try-catch
-  }
-}
-
-module.exports = adminController;
+module.exports = dashboardController;
