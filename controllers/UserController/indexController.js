@@ -1,8 +1,35 @@
-// Imports from the provided file:
 const express = require('express');
 
+// Mock data for recent listings
+const recentListings = [
+    {
+        id: 1,
+        image: '/Public/images/property-2.jpg',
+        title: 'Sunset Villa',
+        address: '123 Sunset Blvd, Malibu, California 90265',
+        beds: 4,
+        baths: 3,
+        sqft: 2000
+    },
+    {
+        id: 2,
+        image: '/Public/images/property-3.jpg',
+        title: 'Urban Loft',
+        address: '456 Downtown St, New York, NY 10001',
+        beds: 2,
+        baths: 2,
+        sqft: 1200
+    }
+];
+
+// Render the index page with recent listings data
 function renderIndex(req, res) {
-  res.render('index');
+  res.render('index', { recentListings: recentListings });
+}
+
+// Endpoint to fetch recent listings in JSON format
+function getRecentListings(req, res) {
+  res.json(recentListings);
 }
 
 function handleRedirect(req, res) {
@@ -50,6 +77,7 @@ function renderBuy(req, res) {
 
 module.exports = {
   renderIndex,
+  getRecentListings,
   handleRedirect,
   renderSell,
   renderRent,
